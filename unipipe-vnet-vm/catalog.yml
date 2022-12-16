@@ -1,0 +1,346 @@
+services:
+- id: 0e14a6a5-a420-4c9a-adb2-bf921b973a96
+  name: "vnet Service"
+  description: "This Service creates a vnet in Azure."
+  bindable: true
+  metadata:
+    displayName: "Azure vnet"
+    imageUrl:
+    tenantAware: true
+  plans:
+    - id: ff5d126b-de2d-4224-91f7-538a66a36a51
+      name: "Standard vnet with Subnets"
+      description: "Standard vnet with a subnet"
+      bindable: true
+      free: true
+      metadata:
+        bullets:
+          - This plan creates one primary subnet within the vnet
+          - Add additional subnets if needed.
+      schemas:
+        service_instance:
+          create:
+            parameters:
+              "$schema": https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#
+              properties:
+                  resource_group_name:
+                    title: Resource Groupe Name
+                    type: string
+                    default: "rg-example-networking-infra"
+                  location_name:
+                    title: Location
+                    type: string
+                    widget:
+                      id: select
+                    default: "West Europe"
+                    enum:
+                    - "West Europe"
+                    - "Germany West Central"
+                  subnets:
+                    title: Subnets
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        subnet_name:
+                          title: Name 
+                          type: string
+                          widget:
+                            id: string
+                          default: "snet-example-app-env-euw-001"
+                        subnet_size:
+                          title: Size (IPv4 CIDR Range)
+                          type: string
+                          widget:
+                            id: string
+                          default: "10.242.250.0/27"
+                  add_gateway_subnet:
+                    title: Add gateway Subnet?
+                    type: boolean
+                    default: false
+                    widget:
+                      id: checkbox
+                  gateway_subnet_name:
+                      title: Gateway Name (alphanumeric with lower dash)
+                      type: string
+                      widget:
+                        id: string
+                      visibleIf:
+                        add_gateway_subnet: true
+                  gateway_subnet_size:
+                    title: Gateway Size (IPv4 CIDR Range)
+                    type: string
+                    widget:
+                      id: string
+                    default: "10.2.0.0/24"
+                    visibleIf:
+                      add_gateway_subnet: true
+
+
+
+- id: d3c6d4c5-e377-41b3-8365-cecf7bd1b8c1
+  name: "Virtual Machine"
+  description: "Virtual machines"
+  bindable: false
+  widget: select
+  metadata:
+    displayName: "Virtual Machine"
+    imageUrl: https://static.docs.com/ui/media/product/azure/virtual-machine.svg
+    longDescription: "Create virtual machines with different SKUs and OS's"
+    providerDisplayName: "meshcloud"
+    documentationUrl: https://learn.microsoft.com/en-us/azure/virtual-machines/av2-series
+    supportUrl: "mkazemi@meshcloud.io"
+  tags:
+    - "ServiceBroker"
+    - "VirtualMachine"
+    - "automation:manual"
+  plans:
+    - id: 43372fe2-2870-4759-ba2a-db9d34f388ce
+      name: "Virtual Machine ubuntu"
+      description: "With 1 disk, vNet and subnet"
+      bindable: false
+      free: false
+      metadata:
+        costs:
+          - amount:
+              eur: 0
+            unit: MONTHLY
+        bullets:
+          - Premium disk
+          - vNet
+          - Subnet 
+      schemas: # schemas define the configuration options offered by a plan
+        service_instance:
+          create:
+            parameters:
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+              required:
+                - Auftragsnummer
+                - name
+                - size
+                - source_image_id
+                - username
+                - ssh_public_key
+              properties:
+
+                Auftragsnummer:
+                  title: Auftragsnummer
+                  description: Order Number
+                  type: string
+
+                name:
+                  title: "HOSTNAME"
+                  description: " - Must be a valid hostname"
+                  type: string
+                  format: hostname
+
+                resource_group_name:
+                    title: Resource Groupe Name
+                    type: string
+                    default: "rg-example-networking-infra"
+
+                location_name:
+                    title: Location
+                    type: string
+                    widget:
+                      id: select
+                    default: "West Europe"
+                    enum:
+                    - "West Europe"
+                    - "Germany West Central"
+
+                virtual_network_name:
+                    title: VNet
+                    type: string
+
+                subnet_name:
+                    title: Subnet
+                    type: string
+                    description: Name of the subnet i.e. "snet-example-app-env-euw-001"
+
+                size: 
+                  title: Size
+                  type: string
+                  description: Determines vCPUs, memory, etc.
+                  enum: 
+                    - Standard_A1_v2
+                    - Standard_A2_v2
+                    - Standard_D2s_v5
+                  widget: select
+                  default: Standard_D2s_v5
+
+                source_image_id:
+                  title: Image
+                  type: string
+                  enum: 
+                    - Canonical:UbuntuServer:18.04-LTS:latest  
+                  widget: select
+                  default: Canonical:UbuntuServer:18.04-LTS:latest
+                
+                username:
+                  title: Username
+                  description: " - Must follow pattern likvid-<name>"
+                  type: string
+                  pattern: '^likvid-\w{3,16}'
+                  default: likvid-
+
+                ssh_public_key:
+                  title: SSH Public Key
+                  description: In OpenSSH format
+                  type: string
+                  pattern: '^ssh-rsa AAAA[0-9A-Za-z+\/]+={0,3}( [^@]+@[^@]+)?$'
+
+
+    - id: 43372fe2-2870-4759-ba2a-db9d34f388ce
+      name: "Virtual Machine Windows-Server"
+      description: "With 1 disk, vNet and subnet"
+      bindable: false
+      free: false
+      metadata:
+        costs:
+          - amount:
+              eur: 0
+            unit: MONTHLY
+        bullets:
+          - Premium disk
+          - vNet
+          - Subnet 
+        
+      schemas: # schemas define the configuration options offered by a plan
+        service_instance:
+          create:
+            parameters:
+              "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+              required:
+                - Auftragsnummer
+                - name
+                - size
+                - OSVersion
+                - adminPsername
+                - adminPassword
+              properties:
+
+                Auftragsnummer:
+                  title: Auftragsnummer
+                  description: Order Number
+                  type: string
+
+                name:
+                  title: "HOSTNAME"
+                  description: " - Must be a valid hostname"
+                  type: string
+                  format: hostname
+
+                resource_group_name:
+                    title: Resource Groupe Name
+                    type: string
+                    default: "rg-example-networking-infra"
+
+                location_name:
+                    title: Location
+                    type: string
+                    widget:
+                      id: select
+                    default: "West Europe"
+                    enum:
+                    - "West Europe"
+                    - "Germany West Central"
+
+                virtual_network_name:
+                    title: VNet
+                    type: string
+
+                subnet_name:
+                    title: Subnet
+                    type: string
+                    description: Name of the subnet i.e. "snet-example-app-env-euw-001"
+
+                size: 
+                  title: Size
+                  type: string
+                  description: Determines vCPUs, memory, etc.
+                  enum: 
+                    - Standard_A1_v2
+                    - Standard_A2_v2
+                    - Standard_D2s_v5
+                  widget: select
+                  default: Standard_D2s_v5
+
+                
+                OSVersion:
+                  title: OS Version
+                  type: string
+                  defaultValue: 2022-datacenter-azure-edition-core
+                  enum:
+                    - 2008-R2-SP1
+                    - 2008-R2-SP1-smalldisk
+                    - 2012-Datacenter
+                    - 2012-datacenter-gensecond
+                    - 2012-Datacenter-smalldisk
+                    - 2012-datacenter-smalldisk-g2
+                    - 2012-Datacenter-zhcn
+                    - 2012-datacenter-zhcn-g2
+                    - 2012-R2-Datacenter
+                    - 2012-r2-datacenter-gensecond
+                    - 2012-R2-Datacenter-smalldisk
+                    - 2012-r2-datacenter-smalldisk-g2
+                    - 2012-R2-Datacenter-zhcn
+                    - 2012-r2-datacenter-zhcn-g2
+                    - 2016-Datacenter
+                    - 2016-datacenter-gensecond
+                    - 2016-datacenter-gs
+                    - 2016-Datacenter-Server-Core
+                    - 2016-datacenter-server-core-g2
+                    - 2016-Datacenter-Server-Core-smalldisk
+                    - 2016-datacenter-server-core-smalldisk-g2
+                    - 2016-Datacenter-smalldisk
+                    - 2016-datacenter-smalldisk-g2
+                    - 2016-Datacenter-with-Containers
+                    - 2016-datacenter-with-containers-g2
+                    - 2016-datacenter-with-containers-gs
+                    - 2016-Datacenter-zhcn
+                    - 2016-datacenter-zhcn-g2
+                    - 2019-Datacenter
+                    - 2019-Datacenter-Core
+                    - 2019-datacenter-core-g2
+                    - 2019-Datacenter-Core-smalldisk
+                    - 2019-datacenter-core-smalldisk-g2
+                    - 2019-Datacenter-Core-with-Containers
+                    - 2019-datacenter-core-with-containers-g2
+                    - 2019-Datacenter-Core-with-Containers-smalldisk
+                    - 2019-datacenter-core-with-containers-smalldisk-g2
+                    - 2019-datacenter-gensecond
+                    - 2019-datacenter-gs
+                    - 2019-Datacenter-smalldisk
+                    - 2019-datacenter-smalldisk-g2
+                    - 2019-Datacenter-with-Containers
+                    - 2019-datacenter-with-containers-g2
+                    - 2019-datacenter-with-containers-gs
+                    - 2019-Datacenter-with-Containers-smalldisk
+                    - 2019-datacenter-with-containers-smalldisk-g2
+                    - 2019-Datacenter-zhcn
+                    - 2019-datacenter-zhcn-g2
+                    - 2022-datacenter
+                    - 2022-datacenter-azure-edition
+                    - 2022-datacenter-azure-edition-core
+                    - 2022-datacenter-azure-edition-core-smalldisk
+                    - 2022-datacenter-azure-edition-smalldisk
+                    - 2022-datacenter-core
+                    - 2022-datacenter-core-g2
+                    - 2022-datacenter-core-smalldisk
+                    - 2022-datacenter-core-smalldisk-g2
+                    - 2022-datacenter-g2
+                    - 2022-datacenter-smalldisk
+                    - 2022-datacenter-smalldisk-g2
+                  widget: select
+                
+                adminUsername:
+                  title: Administrator Username
+                  description: "Must follow pattern likvid-<name>"
+                  type: string
+                  pattern: '^likvid-\w{3,16}'
+                  default: likvid-
+
+                adminPassword:
+                  title: Administrator Password
+                  type: string
