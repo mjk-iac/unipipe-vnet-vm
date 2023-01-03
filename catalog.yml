@@ -193,7 +193,7 @@ services:
 
     - id: cdd2e046-a19e-4a07-821a-a296df66ec06
       name: "Virtual Machine Windows-Server"
-      description: "With 1 disk, vNet and subnet"
+      description: "Windows VM"
       bindable: false
       free: false
       metadata:
