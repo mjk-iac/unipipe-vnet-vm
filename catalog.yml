@@ -334,6 +334,21 @@ services:
                     - 2022-datacenter-smalldisk-g2
                   widget: select
                 
+                nics:
+                  title: Network interface card
+                  description: name of the network interface card
+                  type: string
+
+                data_disks:
+                  title: Data disk
+                  description: Virtual Machine's Data Disk
+                  type: string
+
+                tags:
+                  title: Tag
+                  description: ""
+                  type: string
+
                 adminUsername:
                   title: Administrator Username
                   description: "Must follow pattern likvid-<name>"
